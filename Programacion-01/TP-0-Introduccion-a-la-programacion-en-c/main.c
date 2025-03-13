@@ -9,6 +9,13 @@ void crearMenu(int inicio, int fin){
 float calcularInteres(float capitalInicial){
     return capitalInicial * 0.02;
 }
+float calcularDescuento(float precio){
+    return precio * 0.15;
+}
+float calcularPorcentajeEstudiantes(float estudiantes, float totalEstudiantes){
+    float porcentajeEstudiantes = (float)estudiantes / (float)totalEstudiantes * 100;
+    return porcentajeEstudiantes;
+}
 int main()
 {
     int opcion;
@@ -45,15 +52,26 @@ int main()
                 break;
             }
             case 2:{
-                printf("Una tienda ofrece un descuento del 15% sobre el total de la compra y un cliente desea saber cuánto deberá pagar finalmente por su compra.\n");
-
+                float monto;
+                printf("Una tienda ofrece un descuento del 15 por ciento sobre el total de la compra y un cliente desea saber cuánto deberá pagar finalmente por su compra.\n");
+                printf("Ingrese el monto final de su compra:");
+                scanf("%f", &monto);
+                printf("\nEl precio final es: %.2f\n", monto - calcularDescuento(monto));
                 system("pause");
                 system("cls");
                 break;
             }
             case 3:{
                 printf("Un maestro desea saber qué porcentaje de hombres y de mujeres hay en un grupo de estudiantes.\n");
-
+                int alumnos, alumnas;
+                int totalEstudiantes;
+                printf("Ingrese la cantidad de alumnos: \n");
+                scanf("%i", &alumnos);
+                printf("Ingrese la cantidad de alumnas: \n");
+                scanf("%i", &alumnas);
+                totalEstudiantes = alumnas + alumnos;
+                printf("Porcentaje de alumnos: %.2f\n", calcularPorcentajeEstudiantes(alumnos,totalEstudiantes));
+                printf("Porcentaje de alumnas: %.2f\n", calcularPorcentajeEstudiantes(alumnas,totalEstudiantes));
                 system("pause");
                 system("cls");
                 break;
