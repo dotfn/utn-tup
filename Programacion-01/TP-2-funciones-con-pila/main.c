@@ -38,45 +38,9 @@ Pila crearPilaRandom(int largo)
 {
 	Pila miPila;
 	inicpila(&miPila);
-	int numeroR = numeroRandom(largo);
 	for (int i = 0; i < largo; i++)
 	{
 		apilar(&miPila, numeroRandom(largo));
-	}
-	return miPila;
-}
-
-Pila pasarPila(Pila pilaOrigina)
-{
-	Pila nuevaPila;
-	inicpila(&nuevaPila);
-
-	while (!pilavacia(&pilaOrigina))
-	{
-		apilar(&nuevaPila, desapilar(&pilaOrigina));
-	}
-	return nuevaPila;
-}
-
-Pila PasarPilaMantenerOrden(Pila pilaOriginal)
-{
-	Pila miPila = pasarPila(pilaOriginal);
-	miPila = pasarPila(miPila);
-	return miPila;
-}
-
-Pila cargarPila(Pila miPila)
-{
-	char seguir = 's';
-	int numero = 0;
-	while (seguir == 's')
-	{
-		printf("\nIngrese el numero a cargar:");
-		scanf("%i", &numero);
-		apilar(&miPila, numero);
-		printf("Desea cargar otro numero? (s/n)");
-		limpiarBufferEntrada();
-		scanf("%c", &seguir);
 	}
 	return miPila;
 }
@@ -96,45 +60,75 @@ int buscarMenorElmento(Pila pilaOriginal)
 	return menor;
 }
 
-Pila eliminarElemento(Pila pilaOriginal, int elemento)
+void pasarPila(Pila *pilaOrigina, Pila *pilaCopia)
+{
+	while (!pilavacia(pilaOrigina))
+	{
+		apilar(pilaCopia, desapilar(pilaOrigina));
+	}
+}
+
+void PasarPilaMantenerOrden(Pila *pilaOriginal, Pila *pilaCopia)
+{
+	Pila auxPila;
+	inicpila(&auxPila);
+	pasarPila(pilaOriginal, &auxPila);
+	pasarPila(&auxPila, pilaCopia);
+}
+
+void cargarPila(Pila *pilaOriginal)
+{
+	char seguir = 's';
+	int numero = 0;
+	while (seguir == 's')
+	{
+		printf("\nIngrese el numero a cargar: ");
+		scanf("%i", &numero);
+		apilar(pilaOriginal, numero);
+		printf("Desea cargar otro numero? (s/n): ");
+		limpiarBufferEntrada();
+		scanf("%c", &seguir);
+	}
+}
+
+void eliminarElemento(Pila *pilaOriginal, int elemento)
 {
 	int flag = 1;
 	Pila auxPila;
 	inicpila(&auxPila);
-	Pila copiOriginal;
-	copiOriginal = pasarPila(pilaOriginal);
-	while (!pilavacia(&copiOriginal))
+	while (!pilavacia(pilaOriginal))
 	{
-		apilar(&auxPila, desapilar(&copiOriginal));
-		// flag es para no eliminar solo un elemento
-		// en caso de que el elemento es repetido :)
+		apilar(&auxPila, desapilar(pilaOriginal));
+		// flag es para eliminar solo un elemento
+		// en caso de que el elemento este repetido :)
 		if (tope(&auxPila) == elemento && flag != 0)
 		{
 			desapilar(&auxPila);
 			flag = 0;
 		}
 	}
-	return auxPila;
+	while (!pilavacia(&auxPila) && flag != 1)
+	{
+		apilar(pilaOriginal, desapilar(&auxPila));
+	}
 }
 
-Pila insertarOrdenado(Pila pilaOrdenada, int numero)
+void insertarOrdenado(Pila *pilaOrdenada, int numero)
 {
 	Pila pilaAux;
 	inicpila(&pilaAux);
 
-	while (!pilavacia(&pilaOrdenada) && tope(&pilaOrdenada) > numero)
+	while (!pilavacia(pilaOrdenada) && tope(pilaOrdenada) < numero)
 	{
-		apilar(&pilaAux, desapilar(&pilaOrdenada));
+		apilar(&pilaAux, desapilar(pilaOrdenada));
 	}
 
-	apilar(&pilaOrdenada, numero);
+	apilar(pilaOrdenada, numero);
 
 	while (!pilavacia(&pilaAux))
 	{
-		apilar(&pilaOrdenada, desapilar(&pilaAux));
+		apilar(pilaOrdenada, desapilar(&pilaAux));
 	}
-
-	return pilaOrdenada;
 }
 
 int sumarTopeAnterior(Pila miPila, int cantidad)
@@ -150,18 +144,18 @@ int sumarTopeAnterior(Pila miPila, int cantidad)
 	return suma;
 }
 
-Pila ordenarPila(Pila pilaOriginal)
+void ordenarPila(Pila *pilaOriginal)
 {
-	Pila miPilaOrdena;
-	inicpila(&miPilaOrdena);
-	while (!pilavacia(&pilaOriginal))
-	{
-		int menor = buscarMenorElmento(pilaOriginal);
-		apilar(&miPilaOrdena, menor);
-		pilaOriginal = eliminarElemento(pilaOriginal, menor);
-	}
+	Pila auxPila;
+	inicpila(&auxPila);
 
-	return miPilaOrdena;
+	while (!pilavacia(pilaOriginal))
+	{
+		int menor = buscarMenorElmento(*pilaOriginal);
+		apilar(&auxPila, menor);
+		eliminarElemento(pilaOriginal, menor);
+	}
+	pasarPila(&auxPila, pilaOriginal);
 }
 
 int sumarValoresPila(Pila miPila)
@@ -187,14 +181,16 @@ int largoPila(Pila miPila)
 
 int transformaPilaDecimal(Pila miPila)
 {
-	miPila = pasarPila(miPila);
+	Pila copiaPila;
+	inicpila(&copiaPila);
+	pasarPila(&miPila, &copiaPila);
 	int mult = 0;
 	int suma = 0;
-	while (!pilavacia(&miPila))
+	while (!pilavacia(&copiaPila))
 	{
 		int posicion = 1;
-		int largo = largoPila(miPila) - 1;
-		int tope = desapilar(&miPila);
+		int largo = largoPila(copiaPila) - 1;
+		int tope = desapilar(&copiaPila);
 		for (int i = 0; i < largo; i++)
 		{
 			posicion = posicion * 10;
@@ -217,34 +213,39 @@ float calcularPromedio(Pila miPila)
 	return division(sumaTotal, cantidad);
 }
 
+/// RESOLUCION EJERCICIOS UTILIZANDO PILAS Y PUNTEROS
 void ejercicio1()
 {
 	printf("Ejercicio 1:\nHacer una funcion que permita ingresar varios elementos a una pila, tanto como quiera el usuario. \n");
 	Pila miPilaVacia;
 	inicpila(&miPilaVacia);
-	Pila miPilaCargada = cargarPila(miPilaVacia);
-	mostrar(&miPilaCargada);
+	cargarPila(&miPilaVacia);
+	mostrar(&miPilaVacia);
 }
 
 void ejercicio2()
 {
 	printf("Ejercicio 2\n Hacer una función que pase todos los elementos de una pila a otra.\n");
 	Pila miPila = crearPilaRandom(10);
-	Pila nuevaPila = pasarPila(miPila);
-	printf("\nPila Original: \n");
+	Pila miPila2;
+	inicpila(&miPila2);
+	printf("\nMI PILA 1: \n");
 	mostrar(&miPila);
-	printf("Nueva Pila:\n");
-	mostrar(&nuevaPila);
+	pasarPila(&miPila, &miPila2);
+	printf("OTRA PILA:\n");
+	mostrar(&miPila2);
 }
 
 void ejercicio3()
 {
 	printf("Ejercicio 3\n Hacer una función que pase todos los elementos de una pila a otra, pero conservando el orden.");
 	Pila miPila = crearPilaRandom(10);
-	Pila nuevaPila = PasarPilaMantenerOrden(miPila);
-	printf("Pila Orginal: \n");
+	Pila nuevaPila;
+	inicpila(&nuevaPila);
+	printf("\nPila Orginal: \n");
 	mostrar(&miPila);
-	printf("Nueva Pila:\n");
+	PasarPilaMantenerOrden(&miPila, &nuevaPila);
+	printf("OTRA PILA COPIA:\n");
 	mostrar(&nuevaPila);
 }
 
@@ -256,10 +257,9 @@ void ejercicio4()
 	printf("\nPILA ORIGINAL:");
 	mostrar(&miRandomPila);
 	printf("\nEl numero menor es: %i\n", menor);
-	Pila pilaSinMenorElemento;
-	inicpila(&pilaSinMenorElemento);
-	pilaSinMenorElemento = eliminarElemento(miRandomPila, menor);
-	mostrar(&pilaSinMenorElemento);
+	eliminarElemento(&miRandomPila, menor);
+	printf("\nPILA ORIGINAL SIN EL MENOR ELEMENTO");
+	mostrar(&miRandomPila);
 }
 
 void ejercicio5()
@@ -270,8 +270,8 @@ void ejercicio5()
 	miPila = crearPilaRandom(10);
 	printf("\n\nPILA ORIGINAL:");
 	mostrar(&miPila);
-	printf("PILA ORDENADA");
-	miPila = ordenarPila(miPila);
+	printf("MI PILA ORIGINAL ORDENADA");
+	ordenarPila(&miPila);
 	mostrar(&miPila);
 }
 
@@ -282,7 +282,7 @@ void ejercicio6()
 	Pila miPila;
 	inicpila(&miPila);
 	miPila = crearPilaRandom(10);
-	miPila = ordenarPila(miPila);
+	ordenarPila(&miPila);
 
 	printf("\nPILA ORIGINAL: \n");
 	mostrar(&miPila);
@@ -290,7 +290,7 @@ void ejercicio6()
 	printf("\nIngrese un numero a apilar: ");
 	scanf("%i", &numero);
 
-	miPila = insertarOrdenado(miPila, numero);
+	insertarOrdenado(&miPila, numero);
 
 	printf("\nNUEVA PILA ORDENADA:\n");
 	mostrar(&miPila);
@@ -304,6 +304,7 @@ void ejercicio7()
 
 void ejercicio8()
 {
+	/// EL CASO NO REQUIERE DE UN PUNTERO
 	printf("Ejercicio 8\nHacer una función que sume los dos primeros elementos de una pila (tope y anterior), y retorne la suma,  sin alterar el contenido de la pila.");
 	Pila miRandomPila;
 	miRandomPila = crearPilaRandom(10);
@@ -315,6 +316,7 @@ void ejercicio8()
 
 void ejercicio9()
 {
+	/// EL CASO NO REQUIERE DE UN PUNTERO
 	printf("Ejercicio 9\n Hacer una función que calcule el promedio de los elementos de una pila, para ello hacer también una función que calcule la suma, otra para la cuenta y otra que divida. En total son cuatro funciones, y la función que calcula el promedio invoca a las otras 3.");
 	Pila miRandomPila;
 	miRandomPila = crearPilaRandom(10);
@@ -330,6 +332,7 @@ void ejercicio9()
 
 void ejercicio10()
 {
+	/// EL CASO NO REQUIERE DE UN PUNTERO
 	printf("Ejercicio 10:\nHacer una función que reciba una pila con números de un solo dígito (es responsabilidad de quien usa el programa) y que transforme esos dígitos en un número decimal.");
 	Pila miRandonPila;
 	miRandonPila = crearPilaRandom(9);
@@ -386,11 +389,13 @@ int main()
 		case 9:
 			ejercicio9();
 			system(PAUSE);
+			break;
 		case 10:
 			ejercicio10();
 			system(PAUSE);
+			break;
 		}
-		printf("\nDesea probar otro ejercicio? (s/n)");
+		printf("\nDesea probar otro ejercicio? (s/n) ");
 		limpiarBufferEntrada();
 		scanf("%c", &seguir);
 		system(CLEAR);
