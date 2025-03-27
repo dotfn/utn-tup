@@ -10,19 +10,27 @@
 #ifdef _WIN32
 #define PAUSE "pause"
 #else
-#define PAUSE "read -p 'Presione Enter para continuar...' var"
+#define PAUSE "read -p '\nPresione Enter para continuar...' var"
 #endif
 
-void limpiarBufferEntrada()
+void cleanBuffer()
 {
 	int c;
 	while ((c = getchar()) != '\n' && c != EOF)
 		;
 }
 
-int numeroRandom(int fin)
+int numeroRandom(int limiteInferior, int limiteSuperior)
 {
-	return rand() % fin + 1;
+	// Asegúrate de que el rango sea válido
+	if (limiteInferior > limiteSuperior)
+	{
+		printf("El límite inferior debe ser menor o igual al límite superior.\n");
+		return -1; // Retorna -1 en caso de error
+	}
+
+	// Genera un número aleatorio en el rango [limiteInferior, limiteSuperior]
+	return (rand() % (limiteSuperior - limiteInferior + 1)) + limiteInferior;
 }
 
 float generarNumeroRandomFloat(float min, float max)
@@ -51,7 +59,7 @@ int cargarArregloUsuario(int miArreglo[], int dimension)
 		scanf("%i", &dato);
 		miArreglo[largo] = dato;
 		largo++;
-		limpiarBufferEntrada();
+		cleanBuffer();
 		printf("*Cargar otro? (s/n): ");
 		scanf("%c", &condicional);
 	}
@@ -74,6 +82,7 @@ void imprimirArreglo(int miArreglo[], int largo)
 	}
 	printf("\n");
 }
+
 void imprimirFLoatArreglo(float miArreglo[], int largo)
 {
 	printf("\n^-^ -[El arreglo contiene:] \n");
@@ -90,19 +99,20 @@ void imprimirFLoatArreglo(float miArreglo[], int largo)
 	}
 	printf("\n");
 }
+
 void crearRandomArray(int miArray[], int *lenght)
 {
-	(*lenght) = numeroRandom(*lenght - 1);
+	(*lenght) = numeroRandom(1, *lenght - 1);
 	printf("^_^' -[Solo cargue %i (RANDOM) elementos validos]\n", *lenght);
 	for (int i = 0; i <= *lenght; i++)
 	{
-		miArray[i] = numeroRandom(10);
+		miArray[i] = numeroRandom(1, 10);
 	}
 }
 
 void crearRandomFloatArray(float miArray[], int *lenght)
 {
-	(*lenght) = numeroRandom(*lenght - 1);
+	(*lenght) = numeroRandom(1, *lenght - 1);
 	printf("^_^' -[Solo cargue %i (RANDOM) elementos validos]\n", *lenght);
 	for (int i = 0; i <= *lenght; i++)
 	{
@@ -129,6 +139,7 @@ float sumarFloatArray(float miArray[], int lenght)
 	}
 	return suma;
 }
+
 void arrayToPila(int myArray[], int validos, Pila *myPila)
 {
 	for (int i = 0; i < validos; i++)
@@ -179,7 +190,7 @@ void ejercicio4()
 {
 	printf("Ejercicio 4\n-Hacer una función que reciba como parámetro un arreglo, la cantidad de elementos (válidos) cargados en él y una Pila. La función debe copiar los elementos del arreglo en la pila.\n\n");
 	Pila myPila;
-	int validos = numeroRandom(8);
+	int validos = numeroRandom(1, 8);
 	int myArray[validos];
 	inicpila(&myPila);
 	printf("=_=! -[La dimension de la pila sera: %i]\n\n", validos);
@@ -202,14 +213,100 @@ void ejercicio5()
 	printf("^-^ -[La suma del valor de los elementos validos es: %f]\n\n", suma);
 }
 
+int existeValor(char cadena[])
+{
+}
+
+void cargarCharRandom(char cadena[], int lenght)
+{
+	for (int i = 0; i < lenght; i++)
+	{
+		cadena[i] = numeroRandom(97, 120);
+	}
+}
+void printString(char cadena[], int lenght)
+{
+	printf("\n^-^ -[Estos son los caracteres que tiene tu cadena]\n");
+	printf("    ");
+	for (int i = 0; i < lenght; i++)
+	{
+		printf("%c ", cadena[i]);
+	}
+	printf("\n\n");
+}
+
+int findChar(char cadena[], int lenght, char target)
+{
+	int index = 0;
+	while (index <= lenght && cadena[index] != target)
+	{
+		index++;
+	}
+	if (cadena[index] == target)
+	{
+		printf("\nEl caracter %c existe y esta en la posicion %i\n", target, index + 1);
+		return index;
+	}
+	else
+	{
+		printf("\n*_* -[El caracter %c no existe en la cadena]\n");
+		return -1;
+	}
+}
+
 void ejercicio6()
 {
 	printf("Ejercicio 6\n Realizar una función que indique si un elemento dado se encuentra en un arreglo de caracteres.\n");
+	///
+	int lenght;
+	char target;
+	cleanBuffer();
+	printf("*Ingrese el largo que desea que tenga la cadena: ");
+	scanf("%i", &lenght);
+	char cadena[lenght];
+	cargarCharRandom(cadena, lenght);
+	printString(cadena, lenght);
+	printf("^_^ -[Que caracter necesitas encontrar?] _ ");
+	cleanBuffer();
+	scanf("%c", &target);
+	findChar(cadena, lenght, target);
+}
+
+void sortString(char cadena[], int length)
+{
+	int flag = 1;
+	while (flag == 1)
+	{
+		flag = 0;
+		int index = 0;
+		while (index < length - 1)
+		{
+			if (cadena[index] > cadena[index + 1])
+			{
+				char aux = cadena[index];
+				cadena[index] = cadena[index + 1];
+				cadena[index + 1] = aux;
+				flag = 1;
+			}
+			index++;
+		}
+	}
 }
 
 void ejercicio7()
 {
 	printf("Ejercicio 7\n Realizar una función que inserte un carácter en un arreglo ordenado alfabéticamente, conservando el orden.\n");
+	int lenght;
+	char target;
+	cleanBuffer();
+	printf("*Ingrese el largo que desea que tenga la cadena: ");
+	scanf("%i", &lenght);
+	char cadena[lenght];
+	cargarCharRandom(cadena, lenght);
+	printString(cadena, lenght);
+	sortString(cadena, lenght);
+	printf("*-* -[Te ordene el array!]");
+	printString(cadena, lenght);
 }
 
 void ejercicio8()
@@ -322,10 +419,10 @@ int main()
 			system(PAUSE);
 			break;
 		}
-
+		system(CLEAR);
 		printf("\n(^_^)* ?");
 		printf("\nDesea probar otro ejercicio? (s/n) ");
-		limpiarBufferEntrada();
+		cleanBuffer();
 		scanf("%c", &seguir);
 		system(CLEAR);
 	}
