@@ -13,16 +13,16 @@ typedef struct
 	char fullname[30];
 	int edad;
 	int anio; // año que cursa
-} stAlumno;
+} Student;
 
 // Agrega un alumno al final del archivo
-void agregarAlumnoAlFinal(char nombreArchivo[], stAlumno alumno)
+void addStudent(char fileName[], Student student)
 {
-	FILE *archivo = fopen(nombreArchivo, "ab");
-	if (archivo != NULL)
+	FILE *pFile = fopen(fileName, "ab");
+	if (pFile != NULL)
 	{
-		fwrite(&alumno, sizeof(stAlumno), 1, archivo);
-		fclose(archivo);
+		fwrite(&student, sizeof(Student), 1, pFile);
+		fclose(pFile);
 	}
 	else
 	{
@@ -30,37 +30,17 @@ void agregarAlumnoAlFinal(char nombreArchivo[], stAlumno alumno)
 	}
 }
 
-// Muestra el contenido del archivo
-void mostrarArchivo(char nombreArchivo[])
-{
-	FILE *archivo = fopen(nombreArchivo, "rb");
-	stAlumno alumno;
-	if (archivo != NULL)
-	{
-		while (fread(&alumno, sizeof(stAlumno), 1, archivo))
-		{
-			printf("Legajo: %d\nNombre: %s\nEdad: %d\nAnio: %d\n\n",
-				   alumno.legajo, alumno.fullname, alumno.edad, alumno.anio);
-		}
-		fclose(archivo);
-	}
-	else
-	{
-		printf("No se pudo abrir el archivo para lectura.\n");
-	}
-}
-
 // Cuenta registros
-int contarRegistros(char nombreArchivo[])
+int contarRegistros(char fileName[])
 {
-	FILE *archivo = fopen(nombreArchivo, "rb");
+	FILE *pFile = fopen(fileName, "rb");
 	int cantidad = 0;
-	if (archivo != NULL)
+	if (pFile != NULL)
 	{
-		fseek(archivo, 0, SEEK_END);
-		long tam = ftell(archivo);
-		cantidad = tam / sizeof(stAlumno);
-		fclose(archivo);
+		fseek(pFile, 0, SEEK_END);
+		long tam = ftell(pFile);
+		cantidad = tam / sizeof(Student);
+		fclose(pFile);
 	}
 	else
 	{
@@ -70,38 +50,38 @@ int contarRegistros(char nombreArchivo[])
 }
 
 // Carga un alumno desde consola
-stAlumno cargarAlumnoPorConsola()
+Student getStudentInput()
 {
-	stAlumno alumno;
+	Student student;
 	printf("Ingrese legajo: ");
-	scanf("%d", &alumno.legajo);
+	scanf("%d", &student.legajo);
 	// fflush(stdin);
 	printf("Ingrese nombre y apellido: ");
 	cleanBuffer();
-	gets(alumno.fullname);
+	gets(student.fullname);
 	printf("Ingrese edad: ");
-	scanf("%d", &alumno.edad);
+	scanf("%d", &student.edad);
 
 	printf("Ingrese año que cursa: ");
-	scanf("%d", &alumno.anio);
+	scanf("%d", &student.anio);
 
 	printf("\n");
-	return alumno;
+	return student;
 }
 
 // Carga el archivo con 5 alumnos desde consola si no existe
-void cargarArchivoInicial(char nombreArchivo[])
+void initializeFile(char fileName[])
 {
-	FILE *archivo = fopen(nombreArchivo, "rb");
-	if (archivo != NULL)
+	FILE *pFile = fopen(fileName, "rb");
+	if (pFile != NULL)
 	{
 		printf("El archivo ya existe. No se cargan datos.\n");
-		fclose(archivo);
+		fclose(pFile);
 		return;
 	}
 
-	archivo = fopen(nombreArchivo, "wb");
-	if (archivo == NULL)
+	pFile = fopen(fileName, "wb");
+	if (pFile == NULL)
 	{
 		printf("Error al crear el archivo.\n");
 		return;
@@ -110,36 +90,36 @@ void cargarArchivoInicial(char nombreArchivo[])
 	for (int i = 0; i < 5; i++)
 	{
 		printf("Alumno #%d:\n", i + 1);
-		stAlumno alumno = cargarAlumnoPorConsola();
-		fwrite(&alumno, sizeof(stAlumno), 1, archivo);
+		Student student = getStudentInput();
+		fwrite(&student, sizeof(Student), 1, pFile);
 	}
 
-	fclose(archivo);
+	fclose(pFile);
 	printf("Archivo creado y cargado con 5 alumnos ingresados por el usuario.\n");
 }
 
 // Muestra alumno individual (modular)
-void mostrarAlumno(stAlumno alumno)
+void showStudent(Student student)
 {
 	printf("Legajo: %d\nNombre: %s\nEdad: %d\nAnio: %d\n\n",
-		   alumno.legajo,
-		   alumno.fullname,
-		   alumno.edad,
-		   alumno.anio);
+		   student.legajo,
+		   student.fullname,
+		   student.edad,
+		   student.anio);
 }
 
 // Muestra el archivo usando función modular
-void mostrarArchivoModular(char nombreArchivo[])
+void showFile(char fileName[])
 {
-	FILE *archivo = fopen(nombreArchivo, "rb");
-	stAlumno alumno;
-	if (archivo != NULL)
+	FILE *pFile = fopen(fileName, "rb");
+	Student student;
+	if (pFile != NULL)
 	{
-		while (fread(&alumno, sizeof(stAlumno), 1, archivo))
+		while (fread(&student, sizeof(Student), 1, pFile))
 		{
-			mostrarAlumno(alumno);
+			showStudent(student);
 		}
-		fclose(archivo);
+		fclose(pFile);
 	}
 	else
 	{
@@ -150,17 +130,19 @@ void mostrarArchivoModular(char nombreArchivo[])
 int main()
 {
 
-	cargarArchivoInicial(FILE_NAME);
-	mostrarArchivoModular(FILE_NAME);
+	initializeFile(FILE_NAME);
+	showFile(FILE_NAME);
 
 	printf("Cantidad de registros: %d\n", contarRegistros(FILE_NAME));
-
+	system(PAUSE);
+	system(CLEAR);
 	printf("\n--- Agregar un nuevo alumno al final ---\n");
-	stAlumno nuevo = cargarAlumnoPorConsola();
-	agregarAlumnoAlFinal(FILE_NAME, nuevo);
-
+	Student newStudent = getStudentInput();
+	addStudent(FILE_NAME, newStudent);
+	system(PAUSE);
+	system(CLEAR);
 	printf("\n--- Archivo después de agregar ---\n");
-	mostrarArchivo(FILE_NAME);
+	showFile(FILE_NAME);
 
 	return 0;
 }
