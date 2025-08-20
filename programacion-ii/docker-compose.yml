@@ -1,0 +1,22 @@
+services:
+  src:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: ${NO_ROOT}
+        USER_UID: ${USER_UID}
+        USER_GID: ${USER_GID}
+    container_name: programacion-ii
+    volumes:
+      - ./src:/home/${NO_ROOT}/src
+    working_dir: /home/${NO_ROOT}/src
+    user: ${NO_ROOT}
+    init: true
+    command: tail -f /dev/null
+    # Si quieres que el contenedor se mantenga vivo para VS Code,
+    # puedes usar un comando que no termine inmediatamente.
+    # Por ejemplo, un shell interactivo o un proceso que se ejecute indefinidamente.
+    # command: /bin/zsh -l
+    # O si tu Dockerfile ya tiene un CMD o ENTRYPOINT que mantiene el proceso vivo,
+    # no necesitas esta línea.

@@ -1,0 +1,28 @@
+{
+  "name": "java-temuri",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
+  "service": "src",
+  "overrideCommand": false,
+  "workspaceFolder": "/home/developer/src",
+    "customizations": {
+    "vscode": {
+      "settings": {
+        "java.home": "/opt/java/openjdk",
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-21",
+            "path": "/opt/java/openjdk",
+            "default": true
+          }
+        ]
+      },
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test"
+      ]
+    }
+  }
+}
